@@ -38,10 +38,10 @@ for i in range(100000):
 #print("100000 Entries Logged")
 for i in range(150000):
     n_SCThits.clear()
-    mgg = ROOT.gRandom.Exp(500)
-    weight = 1
-    is_signal = 0
-    is_MC = 1
+    mgg[0] = ROOT.gRandom.Exp(500)
+    weight[0] = 1
+    is_signal[0] = 0
+    is_MC[0] = 1
 
     n_trk = int(ROOT.gRandom.Poisson(35))
     for j in range(n_trk):
