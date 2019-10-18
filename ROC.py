@@ -37,22 +37,18 @@ def roc_maker(sys_argv):
                 break
             user_input = []
             while True:
-                user_input1 = str(input("Attribute:                "))
-                try:
-                    x = getattr(tree_obj, user_input1)
+                user_input1 = str(input("Attribute:                    "))
+                if hasattr(tree_obj, user_input1):
                     user_input.append(user_input1)
-                    break
-                except:
-                    pass
             while True:
-                user_input1 = str(input("<, >, <=, >=, ==, !=:     "))
-                if user_input1 in ["<", ">", "<=", ">=", "==", "!="]:
-                    user_input.append(user_input1)
+                user_input2 = str(input("<, >, <=, >=, ==, !=, in:     "))
+                if user_input2 in ["<", ">", "<=", ">=", "==", "!=", "in"]:
+                    user_input.append(user_input2)
                     break
             while True:
                 try:
-                    user_input1 = str(int(input("Value:                    ")))
-                    user_input.append(user_input1)
+                    user_input3 = str(input("Value:                        "))
+                    user_input.append(user_input3)
                     break
                 except:
                     pass
@@ -68,8 +64,10 @@ def roc_maker(sys_argv):
                 if not eval("getattr(tree_obj, '" + condition[0] + "') " +condition[1] + condition[2]):
                     conditions_met = False
                     break
+            #print("successful approval")
             if conditions_met:
-                h_sig.Fill(getattr(tree_obj, bdt))
+                #print(str(getattr(tree_obj, "weight_for_analysis")))
+                h_sig.Fill(getattr(tree_obj, bdt), getattr(tree_obj, "weight_for_analysis"))
         h_sig.SetDirectory(0)
         inFile.Close()
 
@@ -89,7 +87,7 @@ def roc_maker(sys_argv):
                     conditions_met = False
                     break
             if conditions_met:
-                h_bkg.Fill(getattr(tree_obj, bdt))
+                h_bkg.Fill(getattr(tree_obj, bdt), getattr(tree_obj, "weight_for_analysis"))
         h_bkg.SetDirectory(0)
         inFile.Close()
 
@@ -135,32 +133,32 @@ def roc_maker(sys_argv):
     print("Creating " + tree_name + "_ROC.png")
     #first, analyze the position of the highest peak.
     sig_peak = h_sig.GetXaxis().GetBinCenter(h_sig.GetMaximumBin())
-    eff = array.array('d', (bin_size)*[0.])
-    acc = array.array('d', (bin_size)*[0.])
+    eff = array.array('d', (bin_size+1)*[0.])
+    acc = array.array('d', (bin_size+1)*[0.])
 
-    h_sig_integ = h_sig.Integral(1, bin_size)
-    h_bkg_integ = h_bkg.Integral(1, bin_size)
+    h_sig_integ = h_sig.Integral(0, bin_size+1)
+    h_bkg_integ = h_bkg.Integral(0, bin_size+1)
     if sig_peak < 0.5:
-        for i in range(bin_size):
-            eff[i] = h_sig.Integral(1, i+1)/h_sig_integ
-            acc[i] = 1 - (h_bkg.Integral(1, i+1)/h_bkg_integ)
+        for i in range(bin_size+1):
+            eff[i] = h_sig.Integral(0, i)/h_sig_integ
+            acc[i] = 1 - (h_bkg.Integral(0, i)/h_bkg_integ)
     else:
-        for i in range(bin_size):
-            eff[i] = h_sig.Integral(i+1, bin_size)/h_sig_integ
-            acc[i] = 1 - (h_bkg.Integral(i+1, bin_size)/h_bkg_integ)
+        for i in range(bin_size+1):
+            eff[i] = h_sig.Integral(i, bin_size)/h_sig_integ
+            acc[i] = 1 - (h_bkg.Integral(i, bin_size)/h_bkg_integ)
     c_roc = ROOT.TCanvas("c_roc")
     c_roc.cd()
-    graph = ROOT.TGraph(bin_size-2, eff, acc)
+    graph = ROOT.TGraph(bin_size, eff, acc)
     graph.GetXaxis().SetTitle("Efficiency")
     graph.GetYaxis().SetTitle("Acceptance")
     graph.Draw("AC*")
     latex = ROOT.TLatex()
     latex.SetNDC()
     latex.SetTextColor(1)
-    latex.DrawLatex(0.2, 0.25, "AUC: " + str(round(graph.Integral()+0.5, 5)))
+    latex.DrawLatex(0.2, 0.25, "AUC: " + str(graph.Integral()+0.5))#round(graph.Integral()+0.5, 5)))
     c_roc.Print(tree_name + "_ROC.png")
     print(tree_name + "_ROC.png printed\n")
-    print("Area Under the Curve (AUC): " + str(round(graph.Integral()+0.5, 5)))
+    print("Area Under the Curve (AUC): " + str(graph.Integral()+0.5))#round(graph.Integral()+0.5, 5)))
     print("\nComplete")
 
 sys_argv_list = sys.argv
