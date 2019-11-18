@@ -1,0 +1,34 @@
+variable pt_H F
+variable eta_H F
+variable pT_hadtop1 F
+variable eta_hadtop1 F
+variable pT_hadtop2 F
+variable eta_hadtop2 F
+variable delta_eta_t1EE F
+variable delta_phi_t1EE F
+variable m_t1EEH F
+variable m_t1EE F
+#these are additions made in light of the new root file
+variable m_mgg F
+variable m_mass_multijet F
+variable m_yy F
+variable pT_y1 F
+variable pT_y2 F
+variable m_HT F
+
+method BDTG3
+
+#mode Preparation
+#mode Training
+#mode View
+mode Application
+
+src_file ttH_mc16e.root
+test_con (abs((1000*eta_H)%50)==22||abs((1000*eta_H)%50)==23)
+train_con (abs((1000*eta_H)%50)==26||abs((1000*eta_H)%50)==25)
+#sig_con flag_passedIso&&flag_passedPID&&N_lep==0&&m_nbjet_fixed80>0&&N_j>2&&m_yy<200
+sig_con m_yy<200
+bkg_con !(flag_passedIso&&flag_passedPID)&&m_yy>200
+#variant just_ttH
+#test_con abs((1000*eta_H)%50>25)
+#train_con abs((1000*eta_H)%50<25)
