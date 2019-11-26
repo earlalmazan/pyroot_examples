@@ -1,0 +1,4 @@
+1. Functionality for variants to allow for repeated use of same files over different hyperparameters and preselections.
+2. Additional user input control over Training variables
+3. Cleaning up Application.py
+4. Fix bug in Training.py on line 102-103 that causes crash. Argument 2 does not convert.
